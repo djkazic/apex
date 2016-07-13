@@ -1,0 +1,67 @@
+html, body {
+	color: white;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	background-color: #262626;
+	font-size: 0.9em;
+}
+
+#floating-footer {
+	position: absolute;
+	bottom: 0px;
+	left: 0%;
+	right: 0%;
+	z-index: 5;
+	background-color: #262626;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+	border: 1px solid #262626;
+	text-align: left;
+	font-family: 'Roboto','sans-serif';
+	line-height: 30px;
+}
+
+#map-container {
+	height: 100%;
+	width: 100%;
+}
+
+#map, #map-row, #map-col {
+	height: 100%;
+}
+
+#map-col {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+.control-btn, #hardpoint-data {
+	margin-top: 20px;
+	padding-top: 15px;
+}
+
+.control-btn.btn {
+	margin-left: 1.5px;
+	margin-right: 1.5px;
+}
+
+#inventory {
+	margin-left: 10px
+}
+
+#pac-input {
+	background-color: #fff;
+	font-size: 15px;
+	font-weight: 300;
+	margin-left: 12px;
+	padding: 0 11px 0 13px;
+	text-overflow: ellipsis;
+	width: 300px;
+}
+
+#pac-input:focus {
+	border-color: #4d90fe;
+}

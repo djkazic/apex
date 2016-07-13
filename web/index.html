@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<!-- Head -->
+	<head>
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta charset="utf-8">
+		<title>Apex</title>
+
+		<!-- Font CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+		
+		<!-- Bootstrap -->
+		<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+		
+		<!-- Custom CSS -->
+		<link rel="stylesheet" type="text/css" href="main.css">
+
+		<!-- JS -->
+		<script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>
+		<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkj97OzWfnDLGen6ZxETMPEskLkpRAM2I&callback=initMap&libraries=places">
+		</script>
+		<script src="js/custom.js"></script>
+	</head>
+
+	<!-- Body -->
+	<body>
+		<div id="floating-footer">			
+			<div class="row">
+				<div class="col-xs-3">
+					<button id="inventory" type="button" class="control-btn btn btn-lg btn-info">
+						<i class="fa fa-briefcase"></i>
+					</button>
+				</div>
+
+				<div class="col-xs-3">
+					<button id="test2" type="button" class="control-btn btn btn-lg btn-success">
+						<i class="fa fa-anchor"></i>
+					</button>
+				</div>
+
+				<div class="col-xs-4">
+					@lili.dumoulin.1995: <br>
+					Level 3 <br>
+					2 Hardpoints <br>
+				</div>
+
+				<div id="hardpoint-data"></div>
+			</div>
+		</div>
+
+		<div class="container" id="map-container">
+			<div class="row" id="map-row">
+				<div class="col-xs-12" id="map-col">
+					<div id="map"></div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
