@@ -1,8 +1,8 @@
-package org.alopex.stratos.net.api;
+package org.alopex.apex.net.api;
 
 import java.util.logging.LogManager;
 
-import org.alopex.stratos.net.process.Hardpoint;
+import org.alopex.apex.net.process.Hardpoint;
 import org.restlet.Application;
 import org.restlet.Component;
 import org.restlet.Restlet;

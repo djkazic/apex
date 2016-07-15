@@ -1,4 +1,4 @@
-package org.alopex.stratos.net.api;
+package org.alopex.apex.net.api;
 
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;

@@ -1,9 +1,9 @@
-package org.alopex.stratos.net.process;
+package org.alopex.apex.net.process;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import org.alopex.stratos.db.DB;
+import org.alopex.apex.db.DB;
 import org.json.JSONObject;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.resource.Post;

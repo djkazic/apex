@@ -1,4 +1,4 @@
-package org.alopex.stratos.db;
+package org.alopex.apex.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,7 +11,7 @@ public class DB {
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 			conn = DriverManager.getConnection(
-					  "jdbc:mysql://" + DBSettings.HOST + "/stratos", 
+					  "jdbc:mysql://" + DBSettings.HOST + "/apex", 
 					  DBSettings.USER, 
 				      DBSettings.PASS
 				   );

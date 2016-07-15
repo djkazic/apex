@@ -1,4 +1,4 @@
-package org.alopex.stratos.util;
+package org.alopex.apex.util;
 
 public class Utils {
 

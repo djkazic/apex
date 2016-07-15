@@ -1,8 +1,8 @@
-package org.alopex.stratos;
+package org.alopex.apex;
 
-import org.alopex.stratos.db.DB;
-import org.alopex.stratos.net.api.APIRouter;
-import org.alopex.stratos.util.Utils;
+import org.alopex.apex.db.DB;
+import org.alopex.apex.net.api.APIRouter;
+import org.alopex.apex.util.Utils;
 
 public class Stratos {
 	
