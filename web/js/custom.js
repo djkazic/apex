@@ -1,133 +1,26 @@
 var map;
-var geocoder;
-var latLng;
 var locMarker;
 var locRadius;
+var pointBuffer;
 
 function initMap() {
-	map = new google.maps.Map(document.getElementById('map'), {streetViewControl: false, mapTypeControl: false});
+	map = new google.maps.Map(document.getElementById('map'), {
+		streetViewControl: false, 
+		mapTypeControl: false,
+		draggable: false,
+		zoomControl: false,
+		scrollwheel: false,
+		disableDoubleClickZoom: true
+	});
+
 	setStyles();
 
-	console.log("Setting map center");
-	map.setCenter(new google.maps.LatLng(41.228972, -101.740995));
-
-	console.log("Setting map zoom");
-	map.setZoom(4);
-
 	if (navigator.geolocation) {
-		setTimeout(setUserLocation, 2500);
+		setUserLocation();
 	} else {
 		alert("Looks like this device isn't supported for Apex :(");
+		return;
 	}
-
-	//map.setCenter(latLng);
-	console.log("Setting RTL listener");
-	$('#rtl').on('click', function() {
-		map.panTo(latLng);
-		map.setZoom(19);
-	});
-
-	console.log("Setting map center listener");
-	map.addListener('center_changed', function() {
-		$('#hardpoint-data').empty();
-	});
-
-	geocoder = new google.maps.Geocoder();
-	geolocate(geocoder, "Boston College, MA", true);
-}
-
-function setUserLocation() {
-	var optn = {
-		enableHighAccuracy: true,
-		timeout: Infinity,
-		maximumAge: 0 
-	};
-	navigator.geolocation.watchPosition(
-			function(position) {
-				//console.log("SUCCESS");
-				//console.log("\tLock: " + position.coords.latitude + ", " + position.coords.longitude);
-				latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-
-				if (position.coords.latitude != 0 && position.coords.longitude != 0) {
-					if (!locMarker) {
-						console.log("Setting map zoom limit");
-						map.setOptions({minZoom: 16, maxZoom: 40});
-
-						locMarker = new google.maps.Marker({
-				  			map: map,
-				  			position: latLng,
-				  			icon: 'img/current.png'
-				  		});
-				  		
-				  		locRadius = new google.maps.Circle({
-				  			strokeColor: '#FF0000',
-							strokeOpacity: 0.8,
-							strokeWeight: 1.5,
-							fillColor: '#FF0000',
-							fillOpacity: 0.25,
-							map: map,
-							radius: 40
-				  		});
-				  		
-				  		locRadius.bindTo('center', locMarker, 'position');
-
-				  		setTimeout(function(latLng) {
-							$('#rtl').click();
-						}, 1500, latLng);
-					} else {
-						locMarker.setPosition(latLng);
-					}
-				}
-			}, 
-			function() {
-				console.log("FAILURE");
-			}, 
-			optn
-	);
-}
-
-function geolocate(geocoder, address, marker) {
-	geocoder.geocode({'address': address}, function(results, status) {
-	  	if (status == google.maps.GeocoderStatus.OK) {
-	  		var zoomLevel = 12;
-	  		if (marker) {
-	  			var markerLatLng = new google.maps.Marker({
-		  			map: map,
-		  			position: results[0].geometry.location,
-		  			icon: 'img/full.png',
-		  			animation: google.maps.Animation.DROP
-		  		});
-		  		//console.log(address + " => " + markerLatLng.position);
-		  		zoomLevel += 5;
-	  		}
-
-			markerLatLng.addListener('click', function() {
-				map.panTo(markerLatLng.getPosition());
-				map.setZoom(40);
-
-				$.ajax({
-					url: 'http://localhost:8888/api/hardpoint',
-					method: 'POST',
-					data: JSON.stringify({
-						lat: markerLatLng.getPosition().lat(), 
-						lon: markerLatLng.getPosition().lng()
-					}),
-					success: function(raw) {
-						var data = JSON.parse(raw);
-						var hpData = $('#hardpoint-data');
-						hpData.html(
-									  "<div> Name: " + data['name'] + "</div>"
-									+ "<div> Stability: " + data['stability'] + "</div>"
-								   );
-					}
-				});
-			});
-	  		//map.panTo(results[0].geometry.location);
-	  		//map.setZoom(zoomLevel);
-	  	} else {
-	  		console.log("Maps API error: " + status);
-	  	}
-	});
 }
 
 function setStyles() {
@@ -348,6 +241,11 @@ function setStyles() {
 	];
 	map.setOptions({styles: styles});
 
+	console.log("Setting map center listener");
+	map.addListener('center_changed', function() {
+		$('#hardpoint-data').empty();
+	});
+
 	console.log("Setting map center");
 	map.setCenter(new google.maps.LatLng(41.228972, -101.740995));
 
@@ -355,25 +253,10 @@ function setStyles() {
 	map.setZoom(4);
 
 	if (navigator.geolocation) {
-		setTimeout(setUserLocation, 2500);
+		setUserLocation();
 	} else {
 		alert("Looks like this device isn't supported for Apex :(");
 	}
-
-	//map.setCenter(latLng);
-	console.log("Setting RTL listener");
-	$('#rtl').on('click', function() {
-		map.panTo(latLng);
-		map.setZoom(18);
-	});
-
-	console.log("Setting map center listener");
-	map.addListener('center_changed', function() {
-		$('#hardpoint-data').empty();
-	});
-
-	geocoder = new google.maps.Geocoder();
-	geolocate(geocoder, "Boston College, MA", true);
 }
 
 function setUserLocation() {
@@ -384,15 +267,10 @@ function setUserLocation() {
 	};
 	navigator.geolocation.watchPosition(
 			function(position) {
-				//console.log("SUCCESS");
-				//console.log("\tLock: " + position.coords.latitude + ", " + position.coords.longitude);
-				latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+				var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
 				if (position.coords.latitude != 0 && position.coords.longitude != 0) {
 					if (!locMarker) {
-						console.log("Setting map zoom limit");
-						map.setOptions({minZoom: 15, maxZoom: 40});
-
 						locMarker = new google.maps.Marker({
 				  			map: map,
 				  			position: latLng,
@@ -408,19 +286,75 @@ function setUserLocation() {
 							map: map,
 							radius: 40
 				  		});
+				  		
 				  		locRadius.bindTo('center', locMarker, 'position');
 
-				  		setTimeout(function(latLng) {
-							$('#rtl').click();
-						}, 1500, latLng);
+				  		console.log("Initiating hardpoints pull");
+				  		setTimeout(getHardpoints, 1000);
+
+				  		map.setZoom(18);
 					} else {
 						locMarker.setPosition(latLng);
 					}
+
+					console.log("Repositioning map center");
+					map.setCenter(locMarker.position);
 				}
 			}, 
 			function() {
-				console.log("Failure to obtain geolocation lock");
+				console.log("Geolocation acquisition failure");
 			}, 
 			optn
 	);
+}
+
+function getHardpoints() {
+	console.log("Getting hardpoints for user loc: " + locMarker.position);
+	$.post({
+		url: "http://localhost:8888/api/enumerate",
+		data: JSON.stringify({ user_lat: locMarker.position.lat(), user_lng: locMarker.position.lng() }),
+		success: function(result) {
+			var parsed = JSON.parse(result);
+			pointBuffer = parsed.value;
+			for (var i=0; i < pointBuffer.length; i++) {
+				var markerPos = new google.maps.LatLng(pointBuffer[i].lat, pointBuffer[i].lng);
+				var markerLatLng = new google.maps.Marker({
+					map: map,
+					position: markerPos,
+					icon: 'img/hardpoint.png'
+				});
+
+				markerLatLng.addListener('click', function() {
+					for (var j=0; j < pointBuffer.length; j++) {
+						if (pointBuffer[j].lat == this.position.lat()
+							&& pointBuffer[j].lng == this.position.lng()) {
+							alert("Debug: " + pointBuffer[j].name);
+
+							// Distance check
+							if (distanceCheck(locMarker.position.lat(),
+											  locMarker.position.lng(),
+											  this.position.lat(),
+											  this.position.lng()) <= 40) {
+								alert("Within distance!");
+
+								// Fire off AJAX request here
+							}
+						}
+					}
+				});
+			}
+		}
+	});
+}
+
+function distanceCheck(lat1, lon1, lat2, lon2) {
+    var R = 6378.137; // Radius of earth in KM
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var d = R * c;
+    return d * 1000; // meters
 }
