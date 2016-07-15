@@ -20,6 +20,10 @@ public class DB {
 		}
 	}
 	
+	public static String sanitize(String str) {
+		return str.replaceAll("'","''");
+	}
+	
 	public static Connection getConnection() {
 		return conn;
 	}
