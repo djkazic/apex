@@ -15,6 +15,7 @@ public class Hardpoint extends ServerResource {
 	public String process(JsonRepresentation entity) {
 		this.getResponse().setAccessControlAllowOrigin("*");
 		final JSONObject responseJSON = new JSONObject();
+		
 		try {
 			JSONObject json = entity.getJsonObject();
 			if (json.length() > 0) {
@@ -25,12 +26,16 @@ public class Hardpoint extends ServerResource {
 				lon = String.format("%9.6f", Double.parseDouble(lon));
 				
 				Statement stmt = DB.getConnection().createStatement();
+				
+				//TODO: update search query for 1 mile distance
 				String query = "SELECT * FROM hardpoints WHERE lat = '" + lat + "' AND lng = '" + lon + "'";
 				try {
 					ResultSet rs = stmt.executeQuery(query);
 					if (rs.next()) {
-						responseJSON.put("name", rs.getString("name"));
-						responseJSON.put("stability", rs.getInt("stability"));
+						responseJSON.put("name"   , rs.getString("name"));
+						responseJSON.put("density", rs.getString("density"));
+						responseJSON.put("lat"    , rs.getString("lat"));
+						responseJSON.put("lng"    , rs.getString("lng"));
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
