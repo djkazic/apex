@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import org.alopex.apex.db.DB;
+import org.alopex.apex.util.Utils;
 import org.json.JSONObject;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.resource.Post;
@@ -11,8 +12,9 @@ import org.restlet.resource.ServerResource;
 
 public class Hardpoint extends ServerResource {
 
-	@Post("application/text")
+	@Post
 	public String process(JsonRepresentation entity) {
+		Utils.log(this, "Processing hardpoint request");
 		this.getResponse().setAccessControlAllowOrigin("*");
 		final JSONObject responseJSON = new JSONObject();
 		
