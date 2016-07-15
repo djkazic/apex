@@ -2,6 +2,7 @@ package org.alopex.apex.net.api;
 
 import java.util.logging.LogManager;
 
+import org.alopex.apex.net.process.Enumerate;
 import org.alopex.apex.net.process.Hardpoint;
 import org.restlet.Application;
 import org.restlet.Component;
@@ -29,6 +30,7 @@ public class APIRouter extends Application {
 	public Restlet createInboundRoot() {
 		Router router = new Router(getContext());
 		router.attachDefault(EchoPage.class);
+		router.attach("/api/enumerate", Enumerate.class);
 		router.attach("/api/hardpoint", Hardpoint.class);
 		return router;
 	}

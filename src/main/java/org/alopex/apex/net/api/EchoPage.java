@@ -7,6 +7,6 @@ public class EchoPage extends ServerResource {
 	
 	@Get
 	public String process() {
-		return "Stratos API v1.0";
+		return "Apex API v1.0";
 	}
 }
