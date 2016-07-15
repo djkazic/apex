@@ -4,7 +4,7 @@ import org.alopex.apex.db.DB;
 import org.alopex.apex.net.api.APIRouter;
 import org.alopex.apex.util.Utils;
 
-public class Stratos {
+public class Apex {
 	
 	public static void main(String[] args) {
 		Utils.log("Core", "Opening connection to database...");
