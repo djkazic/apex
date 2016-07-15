@@ -50,3 +50,4 @@ src/main/java/org/alopex/apex/db/DBSettings.java
 
 # Intellij
 .idea/
+src/main/java/org/alopex/apex/util/APISettings.java
