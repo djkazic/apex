@@ -22,8 +22,8 @@ public class Enumerate extends ServerResource {
 		try {
 			JSONObject json = entity.getJsonObject();
 			if (json.length() > 0) {
-				String userLat = "" + json.getDouble("user_lat");
-				String userLng = "" + json.getDouble("user_lng");
+				String userLat = DB.sanitize("" + json.getDouble("user_lat"));
+				String userLng = DB.sanitize("" + json.getDouble("user_lng"));
 						
 				//TODO: log user update		
 				
@@ -31,7 +31,7 @@ public class Enumerate extends ServerResource {
 									+ userLat 
 									+ "), 2) + POW(69.1 * ("
 									+ userLng 
-									+ " - `lng`) * COS(`lat` / 57.3), 2) AS distance FROM hardpoints HAVING distance <= 1 ORDER BY distance";
+									+ " - `lng`) * COS(`lat` / 57.3), 2) AS distance FROM hardpoints HAVING distance <= 0.024 ORDER BY distance";
 				
 				Statement stmt = DB.getConnection().createStatement();
 				ResultSet rs = stmt.executeQuery(fetchQuery);
@@ -39,7 +39,6 @@ public class Enumerate extends ServerResource {
 				int counter = 0;
 				JSONArray outArr = new JSONArray();
 				while (rs.next()) {
-					Utils.log(this, rs.getString("name"));
 					JSONObject rowOutput = new JSONObject();
 					rowOutput.put("id", rs.getInt("id"));
 					rowOutput.put("name", rs.getString("name"));
