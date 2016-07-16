@@ -24,6 +24,10 @@ html, body {
 	line-height: 30px;
 }
 
+#map {
+	z-index: 0;
+}
+
 #map-container {
 	height: 100%;
 	width: 100%;
@@ -38,7 +42,7 @@ html, body {
 	padding-right: 0px;
 }
 
-.control-btn, #hardpoint-data {
+.control-btn {
 	margin-top: 20px;
 	padding-top: 15px;
 }

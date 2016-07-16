@@ -43,7 +43,9 @@ public class Hardpoint extends ServerResource {
 							if (irs.next()) {
 								// Post distance grab
 								if (Utils.latLngDistance(userLat, userLng, lat, lng) <= 40) {
-
+									// Return verification
+									
+									responseJSON.put("value", irs.getString("verified"));
 								} else {
 									responseJSON.put("error", "Hardpoint distance is higher than limit");
 								}

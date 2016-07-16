@@ -244,9 +244,6 @@ function setStyles() {
 	map.setOptions({styles: styles});
 
 	console.log("Setting map center listener");
-	map.addListener('center_changed', function() {
-		$('#hardpoint-data').empty();
-	});
 
 	console.log("Setting map center");
 	map.setCenter(new google.maps.LatLng(41.228972, -101.740995));
@@ -346,6 +343,9 @@ function getHardpoints() {
 											  this.position.lng()) <= 40) {
 								alert("Within distance!");
 
+								$('#hardpoint-data').modal("show");
+
+								/**
 								// Fire off AJAX request here
 								$.post({
 									url: "http://localhost:8888/api/hardpoint",
@@ -354,6 +354,7 @@ function getHardpoints() {
 										alert(result);
 									}
 								});
+								**/
 							}
 						}
 					}
