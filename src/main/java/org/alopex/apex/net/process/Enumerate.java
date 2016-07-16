@@ -25,25 +25,51 @@ public class Enumerate extends ServerResource {
 				String userLat = DB.sanitize("" + json.getDouble("user_lat"));
 				String userLng = DB.sanitize("" + json.getDouble("user_lng"));
 						
-				//TODO: log user update		
-				
-				String fetchQuery = "SELECT id, name, lat, lng, POW(69.1 * (`lat` - "
-									+ userLat 
-									+ "), 2) + POW(69.1 * ("
-									+ userLng 
-									+ " - `lng`) * COS(`lat` / 57.3), 2) AS distance FROM hardpoints HAVING distance <= 0.024 ORDER BY distance";
-				
+				//TODO: DEBUG: send in user ID in production
+				String userID = "1";
+
 				Statement stmt = DB.getConnection().createStatement();
-				ResultSet rs = stmt.executeQuery(fetchQuery);
+
+				// User location logging pre-check
+				String checkQuery = "SELECT * FROM locations WHERE player_id = '" + userID + "'";
+				ResultSet rs = stmt.executeQuery(checkQuery);
+
+				String lastLat = "";
+				String lastLng = "";
+				if (rs.next()) {
+					lastLat = "" + rs.getBigDecimal("lat").doubleValue();
+					lastLng = "" + rs.getBigDecimal("lng").doubleValue();
+				}
+
+				// User location logging
+				if (!userLat.equals(lastLat) || !userLng.equals(lastLng)) {
+					String storeQuery = "INSERT INTO locations VALUES (NULL, '" + userID + "', '" + userLat + "', '" + userLng + "', '" + System.currentTimeMillis() + "')";
+					if (stmt.executeUpdate(storeQuery) >= 0) {
+						responseJSON.put("info", "Requests nominal");
+					} else {
+						responseJSON.put("error", "Failure to log user location");
+					}
+				} else {
+					responseJSON.put("info", "Requests made too quickly");
+				}
+
+				// Hardpoint return
+				String fetchQuery = "SELECT id, name, lat, lng, POW(69.1 * (`lat` - "
+						+ userLat
+						+ "), 2) + POW(69.1 * ("
+						+ userLng
+						+ " - `lng`) * COS(`lat` / 57.3), 2) AS distance FROM hardpoints HAVING distance <= 0.024 ORDER BY distance";
+
+				ResultSet srs = stmt.executeQuery(fetchQuery);
 
 				int counter = 0;
 				JSONArray outArr = new JSONArray();
-				while (rs.next()) {
+				while (srs.next()) {
 					JSONObject rowOutput = new JSONObject();
-					rowOutput.put("id", rs.getInt("id"));
-					rowOutput.put("name", rs.getString("name"));
-					rowOutput.put("lat", rs.getFloat("lat"));
-					rowOutput.put("lng", rs.getFloat("lng"));
+					rowOutput.put("id", srs.getInt("id"));
+					rowOutput.put("name", srs.getString("name"));
+					rowOutput.put("lat", srs.getBigDecimal("lat").doubleValue());
+					rowOutput.put("lng", srs.getBigDecimal("lng").doubleValue());
 
 					outArr.put(counter, rowOutput);
 					counter++;
