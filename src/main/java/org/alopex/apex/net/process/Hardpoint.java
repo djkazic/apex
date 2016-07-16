@@ -21,23 +21,40 @@ public class Hardpoint extends ServerResource {
 		try {
 			JSONObject json = entity.getJsonObject();
 			if (json.length() > 0) {
-				String lat = json.getString("lat");
-				String lon = json.getString("lon");
-				
-				lat = String.format("%9.6f", Double.parseDouble(lat));
-				lon = String.format("%9.6f", Double.parseDouble(lon));
+				//TODO: DEBUG: send in user ID or token for production
+				String userID = "1";
+
+				String lat = DB.sanitize("" + json.getDouble("lat"));
+				String lng = DB.sanitize("" + json.getDouble("lng"));
 				
 				Statement stmt = DB.getConnection().createStatement();
-				
-				//TODO: update search query for 1 mile distance
-				String query = "SELECT * FROM hardpoints WHERE lat = '" + lat + "' AND lng = '" + lon + "'";
+
+				String checkQuery = "SELECT * FROM locations WHERE id = '" + userID + "'";
 				try {
-					ResultSet rs = stmt.executeQuery(query);
+					ResultSet rs = stmt.executeQuery(checkQuery);
 					if (rs.next()) {
-						responseJSON.put("name"   , rs.getString("name"));
-						responseJSON.put("density", rs.getString("density"));
-						responseJSON.put("lat"    , rs.getString("lat"));
-						responseJSON.put("lng"    , rs.getString("lng"));
+						String userLat = "" + rs.getBigDecimal("lat").doubleValue();
+						String userLng = "" + rs.getBigDecimal("lng").doubleValue();
+
+						// Verify hardpoint
+						String query = "SELECT * FROM hardpoints WHERE lat = '" + lat + "' AND lng = '" + lng + "'";
+						try {
+							ResultSet irs = stmt.executeQuery(query);
+							if (irs.next()) {
+								// Post distance grab
+								if (Utils.latLngDistance(userLat, userLng, lat, lng) <= 40) {
+
+								} else {
+									responseJSON.put("error", "Hardpoint distance is higher than limit");
+								}
+							} else {
+								responseJSON.put("error", "No such hardpoint exists at " + lat + ", " + lng);
+							}
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					} else {
+						responseJSON.put("error", "No locations for " + userID + " found");
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
