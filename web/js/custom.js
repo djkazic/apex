@@ -3,6 +3,8 @@ var locMarker;
 var locRadius;
 var pointBuffer;
 
+var repositionCounter = 0;
+
 function initMap() {
 	map = new google.maps.Map(document.getElementById('map'), {
 		streetViewControl: false, 
@@ -289,8 +291,8 @@ function setUserLocation() {
 				  		
 				  		locRadius.bindTo('center', locMarker, 'position');
 
-				  		console.log("Initiating hardpoints pull");
-				  		setTimeout(getHardpoints, 1000);
+				  		console.log("Initiating first hardpoints pull");
+				  		getHardpoints();
 
 				  		map.setZoom(18);
 					} else {
@@ -299,6 +301,12 @@ function setUserLocation() {
 
 					console.log("Repositioning map center");
 					map.setCenter(locMarker.position);
+					repositionCounter++;
+
+					if (repositionCounter % 4 == 0) {
+						console.log("Pulling sequential hardpoints");
+						getHardpoints();
+					}
 				}
 			}, 
 			function() {
@@ -325,9 +333,10 @@ function getHardpoints() {
 				});
 
 				markerLatLng.addListener('click', function() {
+					console.log("Attempting match for: " + this.position.lat() + ", " + this.position.lng().toFixed(6));
 					for (var j=0; j < pointBuffer.length; j++) {
-						if (pointBuffer[j].lat == this.position.lat()
-							&& pointBuffer[j].lng == this.position.lng()) {
+						if (pointBuffer[j].lat == this.position.lat().toFixed(6)
+							&& pointBuffer[j].lng == this.position.lng().toFixed(6)) {
 							alert("Debug: " + pointBuffer[j].name);
 
 							// Distance check
@@ -338,6 +347,13 @@ function getHardpoints() {
 								alert("Within distance!");
 
 								// Fire off AJAX request here
+								$.post({
+									url: "http://localhost:8888/api/hardpoint",
+									data: JSON.stringify({ lat: this.position.lat().toFixed(6), lng: this.position.lng().toFixed(6) }),
+									success: function(result) {
+										alert(result);
+									}
+								});
 							}
 						}
 					}
