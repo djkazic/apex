@@ -6,6 +6,15 @@ var pointBuffer;
 var repositionCounter = 0;
 
 function initMap() {
+	// Register button hooks
+	$('#inventory-open').on('click', function() {
+		$('#inventory').modal("show");
+	});
+
+	$('#stats-open').on('click', function() {
+		$('#stats').modal("show");
+	});
+
 	map = new google.maps.Map(document.getElementById('map'), {
 		streetViewControl: false, 
 		mapTypeControl: false,
@@ -332,29 +341,55 @@ function getHardpoints() {
 				markerLatLng.addListener('click', function() {
 					console.log("Attempting match for: " + this.position.lat() + ", " + this.position.lng().toFixed(6));
 					for (var j=0; j < pointBuffer.length; j++) {
-						if (pointBuffer[j].lat == this.position.lat().toFixed(6)
-							&& pointBuffer[j].lng == this.position.lng().toFixed(6)) {
-							alert("Debug: " + pointBuffer[j].name);
-
+						var markerLat = this.position.lat().toFixed(6);
+						var markerLng = this.position.lng().toFixed(6);
+						if (pointBuffer[j].lat == markerLat
+							&& pointBuffer[j].lng == markerLng) {
+							
 							// Distance check
 							if (distanceCheck(locMarker.position.lat(),
 											  locMarker.position.lng(),
-											  this.position.lat(),
-											  this.position.lng()) <= 40) {
-								alert("Within distance!");
+											  markerLat,
+											  markerLng) <= 40) {
+								var hostname = pointBuffer[j].name.toLowerCase()
+								var consolePrefix = "root@" + hostname + ":~# ";
+								var initialState = consolePrefix + " Awaiting user input... <br>";
+								$('#hardpoint-content').html(initialState);
 
+								$('#hardpoint-title').html(pointBuffer[j].name);
 								$('#hardpoint-data').modal("show");
 
-								/**
-								// Fire off AJAX request here
-								$.post({
-									url: "http://localhost:8888/api/hardpoint",
-									data: JSON.stringify({ lat: this.position.lat().toFixed(6), lng: this.position.lng().toFixed(6) }),
-									success: function(result) {
-										alert(result);
-									}
+								// Register AJAX event to deploy button
+								$('#hardpoint-deploy').on('click', function() {
+									$('#hardpoint-content').html(initialState + consolePrefix + "<br>");
+									
+									var typeWriting = new TypeWriting({
+										targetElement   : document.getElementsByClassName('terminal')[0],
+										inputString     : consolePrefix + './configure; make -j4 <br>',
+										typing_interval : 50, // Interval between each character
+										blink_interval  : '1s', // Interval of the cursor blinks
+										cursor_color    : '#00fd55', // Color of the cursor
+									}, 
+									function() {
+										$('#hardpoint-content').append(consolePrefix + "./scan -target=" + hostname + "<br>");
+									});
+									
+									var execTimer = (function() {
+										setTimeout(function() {
+											$.post({
+												url: "http://localhost:8888/api/hardpoint",
+												data: JSON.stringify({ lat: markerLat, lng: markerLng }),
+												success: function(result) {
+													$('#hardpoint-content').append("> Execution completed. result = [" + result + "]");
+												}
+											});
+										}, 3500);
+									}());
+
+									clearTimeout(execTimer);
 								});
-								**/
+							} else {
+								$('#hardpoint-fail').modal("show");
 							}
 						}
 					}

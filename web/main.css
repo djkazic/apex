@@ -1,10 +1,20 @@
 html, body {
 	color: white;
+	font-family: 'Source Code Pro', monospace;
+	font-size: 0.9em;
 	height: 100%;
 	margin: 0;
 	padding: 0;
 	background-color: #262626;
-	font-size: 0.9em;
+}
+
+.modal-content {
+	color: black;
+}
+
+.modal-body {
+	color: white;
+	background-color: #262626;
 }
 
 #floating-footer {
@@ -20,7 +30,6 @@ html, body {
 	padding-right: 15px;
 	border: 1px solid #262626;
 	text-align: left;
-	font-family: 'Roboto','sans-serif';
 	line-height: 30px;
 }
 

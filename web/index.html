@@ -7,6 +7,7 @@
 		<title>Apex</title>
 
 		<!-- Font CSS -->
+		<link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:300" rel="stylesheet">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 		
 		<!-- Bootstrap -->
@@ -17,11 +18,10 @@
 
 		<!-- JS -->
 		<script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>
-
 		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-
 		<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkj97OzWfnDLGen6ZxETMPEskLkpRAM2I&callback=initMap&libraries=places">
 		</script>
+		<script src="js/typewriting.min.js"></script>
 		<script src="js/custom.js"></script>
 	</head>
 
@@ -30,13 +30,13 @@
 		<div id="floating-footer">			
 			<div class="row">
 				<div class="col-xs-3">
-					<button id="inventory" type="button" class="control-btn btn btn-lg btn-info">
+					<button id="inventory-open" type="button" class="control-btn btn btn-lg btn-info">
 						<i class="fa fa-briefcase"></i>
 					</button>
 				</div>
 
 				<div class="col-xs-3">
-					<button id="test2" type="button" class="control-btn btn btn-lg btn-success">
+					<button id="stats-open" type="button" class="control-btn btn btn-lg btn-success">
 						<i class="fa fa-anchor"></i>
 					</button>
 				</div>
@@ -58,14 +58,65 @@
 							<div class="modal-content">
 								<div class="modal-header">
 									<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-									<h4 class="modal-title" id="myModalLabel">Modal title</h4>
+									<h4 class="modal-title" id="hardpoint-title"></h4>
 								</div>
 								<div class="modal-body">
-									...
+									<div class="terminal" id="hardpoint-content"></div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" id="hardpoint-deploy" class="btn btn-primary">Deploy Scanner</button>
+									<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="modal fade" id="hardpoint-fail" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+									<h4 class="modal-title" id="hardpoint-fail-title">Hardpoint access denied!</h4>
+								</div>
+								<div class="modal-body">
+									begin tranmission: //ERR_CODE: Hardpoint_OUT_OF_RANGE
 								</div>
 								<div class="modal-footer">
 									<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-									<button type="button" class="btn btn-primary">Save changes</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="modal fade" id="inventory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+									<h4 class="modal-title" id="hardpoint-fail-title">Inventory</h4>
+								</div>
+								<div class="modal-body">
+									Frequency Locker
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="modal fade" id="inventory" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+									<h4 class="modal-title" id="hardpoint-fail-title">Stats</h4>
+								</div>
+								<div class="modal-body">
+									Total Captured Species:
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 								</div>
 							</div>
 						</div>
