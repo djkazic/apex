@@ -34,7 +34,6 @@ public class Enumerate extends ServerResource {
 
 				ResultSet gs = stmt.executeQuery(getQuery);
 				if (gs.next()) {
-					System.out.println(gs.getInt("time"));
 					String userID = gs.getString("gid");
 
 					// User location logging pre-check
