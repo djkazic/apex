@@ -56,6 +56,7 @@ public class TokenRequest extends ServerResource {
 						}
 					} else {
 						Utils.log(this, "Failed to identify token [" + apiToken + "]");
+						responseJSON.put("error", "invalid_token");
 					}
 				}
 			}
