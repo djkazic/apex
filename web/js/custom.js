@@ -3,6 +3,8 @@ var locMarker;
 var locRadius;
 var pointBuffer;
 
+var loggedIn = 0;
+
 var repositionCounter = 0;
 
 function initMap() {
@@ -15,22 +17,49 @@ function initMap() {
 		$('#stats').modal("show");
 	});
 
-	map = new google.maps.Map(document.getElementById('map'), {
-		streetViewControl: false, 
-		mapTypeControl: false,
-		draggable: false,
-		zoomControl: false,
-		scrollwheel: false,
-		disableDoubleClickZoom: true
+	$('#hardpoint-data-close').on('click', function() {
+		$('#hardpoint-data').html("");
 	});
 
-	setStyles();
+	$('#sign-out').on('click', function() {
+		var now = new Date();
+		var time = now.getTime();
+		time -= 3600 * 1000;
+		now.setTime(time);
+		document.cookie = "api_token=\"\"" + "; expires = " 
+						  + now.toUTCString() + "; path=/";
+		location.reload();
+	});
 
-	if (navigator.geolocation) {
-		setUserLocation();
+	// Check on login status
+	if (document.cookie.indexOf("api_token") == -1) {
+		$('#register').modal("show");
 	} else {
-		alert("Looks like this device isn't supported for Apex :(");
-		return;
+		var splitCookie = document.cookie.split(";");
+		for (var i=0; i < splitCookie.length; i++) {
+			if (splitCookie[i].indexOf("api_token") != -1) {
+				var splitEntry = splitCookie[i].split("=");
+				apiToken = splitEntry[1];
+			}
+		}
+		
+		map = new google.maps.Map(document.getElementById('map'), {
+			streetViewControl: false, 
+			mapTypeControl: false,
+			draggable: false,
+			zoomControl: false,
+			scrollwheel: false,
+			disableDoubleClickZoom: true
+		});
+
+		setStyles();
+
+		if (navigator.geolocation) {
+			setUserLocation();
+		} else {
+			alert("Looks like this device isn't supported for Apex :(");
+			return;
+		}
 	}
 }
 
@@ -326,74 +355,120 @@ function getHardpoints() {
 	console.log("Getting hardpoints for user loc: " + locMarker.position);
 	$.post({
 		url: "http://localhost:8888/api/enumerate",
-		data: JSON.stringify({ user_lat: locMarker.position.lat(), user_lng: locMarker.position.lng() }),
+		data: JSON.stringify({ api_token: apiToken, user_lat: locMarker.position.lat(), user_lng: locMarker.position.lng() }),
 		success: function(result) {
 			var parsed = JSON.parse(result);
-			pointBuffer = parsed.value;
-			for (var i=0; i < pointBuffer.length; i++) {
-				var markerPos = new google.maps.LatLng(pointBuffer[i].lat, pointBuffer[i].lng);
-				var markerLatLng = new google.maps.Marker({
-					map: map,
-					position: markerPos,
-					icon: 'img/hardpoint.png'
-				});
+			if (parsed.token_expired == "true") {
+				alert("Requesting new token!");
+				requestNewToken();
+			} else {
+				pointBuffer = parsed.value;
+				for (var i=0; i < pointBuffer.length; i++) {
+					var markerPos = new google.maps.LatLng(pointBuffer[i].lat, pointBuffer[i].lng);
+					var markerLatLng = new google.maps.Marker({
+						map: map,
+						position: markerPos,
+						icon: 'img/hardpoint.png'
+					});
 
-				markerLatLng.addListener('click', function() {
-					console.log("Attempting match for: " + this.position.lat() + ", " + this.position.lng().toFixed(6));
-					for (var j=0; j < pointBuffer.length; j++) {
-						var markerLat = this.position.lat().toFixed(6);
-						var markerLng = this.position.lng().toFixed(6);
-						if (pointBuffer[j].lat == markerLat
-							&& pointBuffer[j].lng == markerLng) {
-							
-							// Distance check
-							if (distanceCheck(locMarker.position.lat(),
-											  locMarker.position.lng(),
-											  markerLat,
-											  markerLng) <= 40) {
-								var hostname = pointBuffer[j].name.toLowerCase()
-								var consolePrefix = "root@" + hostname + ":~# ";
-								var initialState = consolePrefix + " Awaiting user input... <br>";
-								$('#hardpoint-content').html(initialState);
+					markerLatLng.addListener('click', function() {
+						console.log("Attempting match for: " + this.position.lat() + ", " + this.position.lng().toFixed(6));
+						for (var j=0; j < pointBuffer.length; j++) {
+							var markerLat = this.position.lat().toFixed(6);
+							var markerLng = this.position.lng().toFixed(6);
+							if (pointBuffer[j].lat == markerLat
+								&& pointBuffer[j].lng == markerLng) {
+								
+								// Distance check
+								if (distanceCheck(locMarker.position.lat(),
+												  locMarker.position.lng(),
+												  markerLat,
+												  markerLng) <= 40) {
+									var hostname = pointBuffer[j].name.toLowerCase()
+									var consolePrefix = "root@" + hostname + ":~# ";
+									var initialState = consolePrefix + " Awaiting user input... <br>";
+									$('#hardpoint-content').html(initialState);
 
-								$('#hardpoint-title').html(pointBuffer[j].name);
-								$('#hardpoint-data').modal("show");
+									$('#hardpoint-title').html(pointBuffer[j].name.toUpperCase());
+									$('#hardpoint-data').modal("show");
 
-								// Register AJAX event to deploy button
-								$('#hardpoint-deploy').on('click', function() {
-									$('#hardpoint-content').html(initialState + consolePrefix + "<br>");
-									
-									var typeWriting = new TypeWriting({
-										targetElement   : document.getElementsByClassName('terminal')[0],
-										inputString     : consolePrefix + './configure; make -j4 <br>',
-										typing_interval : 50, // Interval between each character
-										blink_interval  : '1s', // Interval of the cursor blinks
-										cursor_color    : '#00fd55', // Color of the cursor
-									}, 
-									function() {
-										$('#hardpoint-content').append(consolePrefix + "./scan -target=" + hostname + "<br>");
-									});
-									
-									var execTimer = (function() {
+									// Register AJAX event to deploy button
+									$('#hardpoint-deploy').on('click', function() {
+										$('#hardpoint-content').html(initialState + consolePrefix + "<br>");
+										
+										var typeWriting = new TypeWriting({
+											targetElement   : document.getElementsByClassName('terminal')[0],
+											inputString     : consolePrefix + './configure; make -j4 <br>',
+											typing_interval : 50, // Interval between each character
+											blink_interval  : '1s', // Interval of the cursor blinks
+											cursor_color    : '#00fd55', // Color of the cursor
+										}, 
+										function() {
+											$('#hardpoint-content').append(consolePrefix + "./scan -target=" + hostname + "<br>");
+										});
+										
 										setTimeout(function() {
 											$.post({
 												url: "http://localhost:8888/api/hardpoint",
-												data: JSON.stringify({ lat: markerLat, lng: markerLng }),
+												data: JSON.stringify({ api_token: apiToken, lat: markerLat, lng: markerLng }),
 												success: function(result) {
 													$('#hardpoint-content').append("> Execution completed. result = [" + result + "]");
 												}
 											});
 										}, 3500);
-									}());
-
-									clearTimeout(execTimer);
-								});
-							} else {
-								$('#hardpoint-fail').modal("show");
+									});
+								} else {
+									$('#hardpoint-fail').modal("show");
+								}
 							}
 						}
-					}
-				});
+					});
+				}
+			}
+		}
+	});
+}
+
+function onSignIn(googleUser) {
+	var profile = googleUser.getAuthResponse().id_token;
+	$.post({
+		url: 'http://localhost:8888/api/auth',
+		data: JSON.stringify({ token: profile }),
+		success: function(result) {
+			console.log("Auth result: [" + result + "]");
+			result = JSON.parse(result);
+			if (result.token == "registration") {
+				// Handle registration logic (prompt for username)
+
+			} else if (result.error == "Invalid token") {
+				alert("Invalid Google sign-in token!");
+			} else {
+				// Handle incoming token as a cookie
+				var now = new Date();
+				var time = now.getTime();
+				time += 3600 * 1000;
+				now.setTime(time);
+				document.cookie = "api_token=" + result.token + "; expires = " 
+								  + now.toUTCString() + "; path=/";
+			}
+		}
+	});
+}
+
+function requestNewToken() {
+	$.post({
+		url: 'http://localhost:8888/api/tokenrequest',
+		data: JSON.stringify({ api_token: apiToken }),
+		success: function(result) {
+			result = JSON.parse(result);
+			if (result.token) {
+				apiToken = result.token;
+				var now = new Date();
+				var time = now.getTime();
+				time += 3600 * 1000;
+				now.setTime(time);
+				document.cookie = "api_token=" + result.token + "; expires = " 
+								  + now.toUTCString() + "; path=/";
 			}
 		}
 	});

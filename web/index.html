@@ -2,6 +2,7 @@
 <html>
 	<!-- Head -->
 	<head>
+		<meta name="google-signin-client_id" content="194275433417-4augssk5ahkcmvtehnmqea2rfb8ouctk.apps.googleusercontent.com">
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta charset="utf-8">
 		<title>Apex</title>
@@ -22,6 +23,7 @@
 		<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkj97OzWfnDLGen6ZxETMPEskLkpRAM2I&callback=initMap&libraries=places">
 		</script>
 		<script src="js/typewriting.min.js"></script>
+		<script src="https://apis.google.com/js/platform.js" async defer></script>
 		<script src="js/custom.js"></script>
 	</head>
 
@@ -42,9 +44,9 @@
 				</div>
 
 				<div class="col-xs-4">
-					@lili.dumoulin.1995: <br>
-					Level 3 <br>
-					2 Hardpoints <br>
+					@NightKnight1995: <br>
+					Level <b>[3]</b> <br>
+					Bonus <b>[2]</b> <br>
 				</div>
 			</div>
 		</div>
@@ -65,7 +67,7 @@
 								</div>
 								<div class="modal-footer">
 									<button type="button" id="hardpoint-deploy" class="btn btn-primary">Deploy Scanner</button>
-									<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+									<button id="hardpoint-data-close" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 								</div>
 							</div>
 						</div>
@@ -76,7 +78,7 @@
 							<div class="modal-content">
 								<div class="modal-header">
 									<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
-									<h4 class="modal-title" id="hardpoint-fail-title">Hardpoint access denied!</h4>
+									<h4 class="modal-title" id="hardpoint-fail-title">HARDPOINT ACCESS DENIED</h4>
 								</div>
 								<div class="modal-body">
 									begin tranmission: //ERR_CODE: Hardpoint_OUT_OF_RANGE
@@ -97,6 +99,24 @@
 								</div>
 								<div class="modal-body">
 									Frequency Locker
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+									<button type="button" id="sign-out" class="btn btn-primary">Sign Out</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="modal fade" id="register" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+									<h4 class="modal-title" id="register-title">REGISTER / LOGIN</h4>
+								</div>
+								<div class="modal-body">
+									<div class="g-signin2" data-onsuccess="onSignIn"></div>
 								</div>
 								<div class="modal-footer">
 									<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

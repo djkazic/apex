@@ -18,63 +18,74 @@ public class Enumerate extends ServerResource {
 		Utils.log(this, "Processing enumerate request");
 		this.getResponse().setAccessControlAllowOrigin("*");
 		final JSONObject responseJSON = new JSONObject();
+		String apiToken;
 		
 		try {
 			JSONObject json = entity.getJsonObject();
 			if (json.length() > 0) {
 				String userLat = DB.sanitize("" + json.getDouble("user_lat"));
 				String userLng = DB.sanitize("" + json.getDouble("user_lng"));
-						
-				//TODO: DEBUG: send in user ID in production
-				String userID = "1";
+				apiToken = DB.sanitize("" + json.getString("api_token"));
 
 				Statement stmt = DB.getConnection().createStatement();
 
-				// User location logging pre-check
-				String checkQuery = "SELECT * FROM locations WHERE player_id = '" + userID + "'";
-				ResultSet rs = stmt.executeQuery(checkQuery);
+				String getQuery = "SELECT * FROM tokens WHERE token = '" + apiToken + "' AND time >= '"
+						          + (System.currentTimeMillis() / 1000) + "'";
 
-				String lastLat = "";
-				String lastLng = "";
-				if (rs.next()) {
-					lastLat = "" + rs.getBigDecimal("lat").doubleValue();
-					lastLng = "" + rs.getBigDecimal("lng").doubleValue();
-				}
+				ResultSet gs = stmt.executeQuery(getQuery);
+				if (gs.next()) {
+					System.out.println(gs.getInt("time"));
+					String userID = gs.getString("gid");
 
-				// User location logging
-				if (!userLat.equals(lastLat) || !userLng.equals(lastLng)) {
-					String storeQuery = "INSERT INTO locations VALUES (NULL, '" + userID + "', '" + userLat + "', '" + userLng + "', '" + System.currentTimeMillis() + "')";
-					if (stmt.executeUpdate(storeQuery) >= 0) {
-						responseJSON.put("info", "Requests nominal");
-					} else {
-						responseJSON.put("error", "Failure to log user location");
+					// User location logging pre-check
+					String checkQuery = "SELECT * FROM locations WHERE player_id = '" + userID + "'";
+					ResultSet rs = stmt.executeQuery(checkQuery);
+
+					String lastLat = "";
+					String lastLng = "";
+					if (rs.next()) {
+						lastLat = "" + rs.getBigDecimal("lat").doubleValue();
+						lastLng = "" + rs.getBigDecimal("lng").doubleValue();
 					}
+
+					// User location logging
+					if (!userLat.equals(lastLat) || !userLng.equals(lastLng)) {
+						String storeQuery = "INSERT INTO locations VALUES (NULL, '" + userID + "', '" + userLat + "', '" + userLng + "', '" + System.currentTimeMillis() + "')";
+						if (stmt.executeUpdate(storeQuery) >= 0) {
+							responseJSON.put("info", "Requests nominal");
+						} else {
+							responseJSON.put("error", "Failure to log user location");
+						}
+					} else {
+						responseJSON.put("info", "Requests made too quickly");
+					}
+
+					// Hardpoint return
+					String fetchQuery = "SELECT id, name, lat, lng, POW(69.1 * (`lat` - "
+							+ userLat
+							+ "), 2) + POW(69.1 * ("
+							+ userLng
+							+ " - `lng`) * COS(`lat` / 57.3), 2) AS distance FROM hardpoints HAVING distance <= 0.024 ORDER BY distance";
+
+					ResultSet srs = stmt.executeQuery(fetchQuery);
+
+					int counter = 0;
+					JSONArray outArr = new JSONArray();
+					while (srs.next()) {
+						JSONObject rowOutput = new JSONObject();
+						rowOutput.put("id", srs.getInt("id"));
+						rowOutput.put("name", srs.getString("name"));
+						rowOutput.put("lat", srs.getBigDecimal("lat").doubleValue());
+						rowOutput.put("lng", srs.getBigDecimal("lng").doubleValue());
+
+						outArr.put(counter, rowOutput);
+						counter++;
+					}
+					responseJSON.put("value", outArr);
 				} else {
-					responseJSON.put("info", "Requests made too quickly");
+					Utils.log(this, "Token expiry for [" + apiToken + "]");
+					responseJSON.put("token_expired", "true");
 				}
-
-				// Hardpoint return
-				String fetchQuery = "SELECT id, name, lat, lng, POW(69.1 * (`lat` - "
-						+ userLat
-						+ "), 2) + POW(69.1 * ("
-						+ userLng
-						+ " - `lng`) * COS(`lat` / 57.3), 2) AS distance FROM hardpoints HAVING distance <= 0.024 ORDER BY distance";
-
-				ResultSet srs = stmt.executeQuery(fetchQuery);
-
-				int counter = 0;
-				JSONArray outArr = new JSONArray();
-				while (srs.next()) {
-					JSONObject rowOutput = new JSONObject();
-					rowOutput.put("id", srs.getInt("id"));
-					rowOutput.put("name", srs.getString("name"));
-					rowOutput.put("lat", srs.getBigDecimal("lat").doubleValue());
-					rowOutput.put("lng", srs.getBigDecimal("lng").doubleValue());
-
-					outArr.put(counter, rowOutput);
-					counter++;
-				}
-				responseJSON.put("value", outArr);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
